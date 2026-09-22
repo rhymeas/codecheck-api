@@ -1,5 +1,10 @@
 # Launch / content draft
 
+## Live links (already public)
+- Repository: <https://github.com/rhymeas/codecheck-api>
+- In-browser demo (runs the validators client-side): <https://rhymeas.github.io/codecheck-api/>
+- API base URL: fill in after `npm run deploy` (SETUP.md part A)
+
 ## Show HN / dev.to title options
 - Show HN: I built a checksum-validation API that answers in 5 ms because it never calls anyone
 - Your identifier validator is slow because it does a database lookup. It doesn't need to.
