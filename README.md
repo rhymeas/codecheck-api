@@ -146,6 +146,12 @@ npm run typecheck
 
 ## Deploy
 
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/rhymeas/codecheck-api)
+
+The button creates the Worker from this repository in your own Cloudflare
+account. It deploys with `DEV_MODE = "0"` and no secrets, so the endpoints stay
+locked until you set `API_KEY` below. Prefer the CLI? The equivalent is:
+
 ```bash
 npx wrangler login
 npx wrangler secret put API_KEY

@@ -30,6 +30,10 @@ Total time: roughly 30–45 minutes. Cost: €0.
 
 ## Part A — deploy the Worker (about 10 minutes)
 
+Fastest path: click the **Deploy to Cloudflare** button in the README. It creates
+the Worker in your own account in one step (still set `API_KEY` afterwards, step
+4 below). The manual path below is the same thing with more visibility:
+
 1. Create a free Cloudflare account at <https://dash.cloudflare.com/sign-up>.
    No credit card is required for Workers.
 
