@@ -1,7 +1,14 @@
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { VALIDATORS, supportedTypes, completableTypes, validate } from "../src/validators.ts";
+import {
+  VALIDATORS,
+  supportedTypes,
+  completableTypes,
+  validate,
+  vatFormats,
+  ibanCountries,
+} from "../src/validators.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const out = join(here, "..", "docs");
@@ -41,6 +48,120 @@ function relatedNav(current: string): string {
     .map((t) => `<a href="./${t}.html">${t}</a>`)
     .join("");
   return `<nav class="types"><a href="./index.html">demo</a>${links}</nav>`;
+}
+
+const GUIDES = [
+  { slug: "iban-lengths", title: "IBAN country list" },
+  { slug: "vat-number-formats", title: "VAT number formats" },
+];
+
+function guidesNav(): string {
+  const links = GUIDES.map((g) => `<a href="./${g.slug}.html">${g.title}</a>`).join("");
+  return `<nav class="types">${links}</nav>`;
+}
+
+function guideShell(slug: string, title: string, description: string, body: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${escapeHtml(title)}</title>
+<meta name="description" content="${escapeHtml(description)}" />
+<link rel="canonical" href="${SITE}/${slug}.html" />
+<style>
+${CSS}
+</style>
+</head>
+<body>
+<main>
+${body}
+  <section class="card">
+    <h2>Reference pages</h2>
+    ${relatedNav("")}
+    ${guidesNav()}
+  </section>
+  <footer>
+    <p>Every check runs offline in the <a href="./index.html">browser demo</a>, or over the JSON API from the <a href="https://github.com/rhymeas/codecheck-api">open-source repository</a>.</p>
+    <p>Nothing you type leaves the page — all checks are local arithmetic.</p>
+  </footer>
+</main>
+</body>
+</html>
+`;
+}
+
+function ibanGuide(): string {
+  const countries = ibanCountries();
+  const rows = countries
+    .map((c) => `<tr><td>${c.country}</td><td>${c.length}</td></tr>`)
+    .join("\n        ");
+  const body = `  <h1>IBAN <span>country list</span></h1>
+  <p class="lead">Every country that uses IBAN, with the exact total length in characters. A valid IBAN must match the length of its country, then pass the ISO 13616 mod-97 check.</p>
+
+  <section class="card">
+    <h2>How the check works</h2>
+    <p>Remove spaces and uppercase the string. Move the four leading characters (country code plus check digits) to the end. Replace each letter with its position in the alphabet plus 9 (A=10, B=11, ... Z=35). Read the result as one huge integer and take it modulo 97: a valid IBAN leaves remainder 1.</p>
+    <p>That is pure arithmetic, so it needs no bank directory and no network call. Try it on the <a href="./iban.html">IBAN reference page</a> or in the <a href="./index.html?type=iban&amp;value=DE89370400440532013000">browser demo</a>.</p>
+<pre>curl "https://&lt;your-worker&gt;.workers.dev/v1/validate/iban/DE89370400440532013000"</pre>
+  </section>
+
+  <section class="card">
+    <h2>Lengths by country</h2>
+    <p>${countries.length} countries are listed. Country codes not in this table are rejected, because no official IBAN length is defined for them.</p>
+    <table>
+      <thead>
+        <tr><th>Country</th><th>IBAN length</th></tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  </section>
+
+`;
+  return guideShell(
+    "iban-lengths",
+    "IBAN country list — lengths and the mod-97 check",
+    "Full IBAN country list with each IBAN length, plus how the ISO 13616 mod-97 check digit works and how to validate an IBAN offline.",
+    body,
+  );
+}
+
+function vatGuide(): string {
+  const formats = vatFormats();
+  const rows = formats
+    .map((f) => `<tr><td>${f.country}</td><td>${escapeHtml(f.hint)}</td></tr>`)
+    .join("\n        ");
+  const body = `  <h1>VAT number <span>formats by country</span></h1>
+  <p class="lead">The national format of every EU and EFTA VAT number, so you can reject malformed input before you ever call a lookup service.</p>
+
+  <section class="card">
+    <h2>Format check first, lookup second</h2>
+    <p>Every VAT number starts with a two-letter country code followed by the national body. The body has a fixed shape per country, so a format check catches obvious typos and test data instantly, with no upstream call. Existence checks (VIES or a national registry) are a separate, slower step that only makes sense after the format is right.</p>
+    <p>CodeCheck validates the format of all ${formats.length} countries below. Try one in the <a href="./index.html?type=vat&amp;value=DE123456789">browser demo</a> or read the <a href="./vat.html">VAT reference page</a>.</p>
+<pre>curl "https://&lt;your-worker&gt;.workers.dev/v1/validate/vat/DE123456789"</pre>
+  </section>
+
+  <section class="card">
+    <h2>Formats</h2>
+    <table>
+      <thead>
+        <tr><th>Country</th><th>Body format</th></tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  </section>
+
+`;
+  return guideShell(
+    "vat-number-formats",
+    "EU and EFTA VAT number formats by country",
+    "VAT number format for every EU and EFTA country, with the country prefix and national body pattern, so you can validate VAT numbers without a lookup call.",
+    body,
+  );
 }
 
 function page(type: string): string {
@@ -131,6 +252,7 @@ ${completeBlock}
   <section class="card">
     <h2>Other identifier types</h2>
     ${relatedNav(type)}
+    ${guidesNav()}
   </section>
 
   <footer>
@@ -150,8 +272,12 @@ for (const type of types) {
   writeFileSync(join(out, `${type}.html`), page(type), "utf8");
 }
 
+writeFileSync(join(out, "iban-lengths.html"), ibanGuide(), "utf8");
+writeFileSync(join(out, "vat-number-formats.html"), vatGuide(), "utf8");
+
 const today = new Date().toISOString().slice(0, 10);
-const urls = ["", ...types.map((t) => `${t}.html`)].map((p) => `  <url><loc>${SITE}/${p}</loc><lastmod>${today}</lastmod></url>`).join("\n");
+const pages = ["", ...types.map((t) => `${t}.html`), ...GUIDES.map((g) => `${g.slug}.html`)];
+const urls = pages.map((p) => `  <url><loc>${SITE}/${p}</loc><lastmod>${today}</lastmod></url>`).join("\n");
 writeFileSync(
   join(out, "sitemap.xml"),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`,
@@ -159,4 +285,4 @@ writeFileSync(
 );
 writeFileSync(join(out, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: ${SITE}/sitemap.xml\n`, "utf8");
 
-console.log(`generated ${types.length} type pages, sitemap.xml and robots.txt in docs/`);
+console.log(`generated ${types.length} type pages, ${GUIDES.length} guide pages, sitemap.xml and robots.txt in docs/`);

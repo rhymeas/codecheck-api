@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { VALIDATORS, normalize, validate } from "../src/validators";
+import { VALIDATORS, ibanCountries, normalize, validate, vatFormats } from "../src/validators";
 
 type Vector = { type: string; value: string; valid: boolean };
 
@@ -214,5 +214,23 @@ describe("registry", () => {
   });
   it("throws on unsupported type", () => {
     expect(() => validate("nope", "1")).toThrow("unsupported type 'nope'");
+  });
+});
+
+describe("reference data", () => {
+  it("lists every vat format in country order", () => {
+    const formats = vatFormats();
+    expect(formats.length).toBe(31);
+    expect(formats.map((f) => f.country)).toEqual([...formats.map((f) => f.country)].sort());
+    expect(formats.find((f) => f.country === "DE")?.hint).toBe("DE, 9 digits");
+    expect(formats.find((f) => f.country === "CH")?.hint).toContain("MWST");
+  });
+
+  it("lists iban lengths in country order", () => {
+    const countries = ibanCountries();
+    expect(countries.length).toBeGreaterThan(70);
+    expect(countries.map((c) => c.country)).toEqual([...countries.map((c) => c.country)].sort());
+    expect(countries.find((c) => c.country === "DE")?.length).toBe(22);
+    expect(countries.find((c) => c.country === "LC")?.length).toBe(32);
   });
 });

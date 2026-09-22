@@ -1029,6 +1029,18 @@ export function supportedTypes(): string[] {
   return Object.keys(VALIDATORS);
 }
 
+export function vatFormats(): { country: string; hint: string }[] {
+  return Object.keys(VAT_BODY)
+    .sort()
+    .map((country) => ({ country, hint: VAT_BODY[country].hint }));
+}
+
+export function ibanCountries(): { country: string; length: number }[] {
+  return Object.keys(IBAN_LENGTHS)
+    .sort()
+    .map((country) => ({ country, length: IBAN_LENGTHS[country] }));
+}
+
 export type CompletionResult = {
   type: string;
   body: string;

@@ -9,6 +9,12 @@ https://rhymeas.github.io/codecheck-api/
 type, written for search engines and humans):
 https://rhymeas.github.io/codecheck-api/gtin.html
 
+**Country reference pages:** every IBAN length
+(https://rhymeas.github.io/codecheck-api/iban-lengths.html) and every EU/EFTA
+VAT number format
+(https://rhymeas.github.io/codecheck-api/vat-number-formats.html), generated
+from the same tables the validators use.
+
 Pure math, zero data lookups, zero storage, no external dependencies at
 runtime. Every response is computed from the input alone, so the service is
 cacheable, privacy-safe and cheap to run.

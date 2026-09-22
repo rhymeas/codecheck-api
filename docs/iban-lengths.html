@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IBAN country list — lengths and the mod-97 check</title>
+<meta name="description" content="Full IBAN country list with each IBAN length, plus how the ISO 13616 mod-97 check digit works and how to validate an IBAN offline." />
+<link rel="canonical" href="https://rhymeas.github.io/codecheck-api/iban-lengths.html" />
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--line:#262b36;--fg:#e7ebf0;--dim:#9aa4b2;--accent:#6ea8fe;--ok:#35c07a;--bad:#ef5f6b;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+h1{font-size:28px;margin:0 0 8px;letter-spacing:-.02em}
+h1 span{color:var(--accent)}
+h2{font-size:18px;margin:32px 0 10px}
+p.lead{color:var(--dim);margin:0 0 28px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin:0 0 24px}
+pre{background:#0b0d11;border:1px solid var(--line);border-radius:8px;padding:14px;overflow:auto;font:13px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+td:first-child{font-family:var(--mono)}
+a{color:var(--accent)}
+footer{color:var(--dim);font-size:13px;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+code{font-family:var(--mono)}
+nav.types{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0;padding:0;list-style:none}
+nav.types a{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px;text-decoration:none;color:var(--fg)}
+nav.types a:hover{border-color:var(--accent);color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+  <h1>IBAN <span>country list</span></h1>
+  <p class="lead">Every country that uses IBAN, with the exact total length in characters. A valid IBAN must match the length of its country, then pass the ISO 13616 mod-97 check.</p>
+
+  <section class="card">
+    <h2>How the check works</h2>
+    <p>Remove spaces and uppercase the string. Move the four leading characters (country code plus check digits) to the end. Replace each letter with its position in the alphabet plus 9 (A=10, B=11, ... Z=35). Read the result as one huge integer and take it modulo 97: a valid IBAN leaves remainder 1.</p>
+    <p>That is pure arithmetic, so it needs no bank directory and no network call. Try it on the <a href="./iban.html">IBAN reference page</a> or in the <a href="./index.html?type=iban&amp;value=DE89370400440532013000">browser demo</a>.</p>
+<pre>curl "https://&lt;your-worker&gt;.workers.dev/v1/validate/iban/DE89370400440532013000"</pre>
+  </section>
+
+  <section class="card">
+    <h2>Lengths by country</h2>
+    <p>77 countries are listed. Country codes not in this table are rejected, because no official IBAN length is defined for them.</p>
+    <table>
+      <thead>
+        <tr><th>Country</th><th>IBAN length</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>AD</td><td>24</td></tr>
+        <tr><td>AE</td><td>23</td></tr>
+        <tr><td>AL</td><td>28</td></tr>
+        <tr><td>AT</td><td>20</td></tr>
+        <tr><td>AZ</td><td>28</td></tr>
+        <tr><td>BA</td><td>20</td></tr>
+        <tr><td>BE</td><td>16</td></tr>
+        <tr><td>BG</td><td>22</td></tr>
+        <tr><td>BH</td><td>22</td></tr>
+        <tr><td>BR</td><td>29</td></tr>
+        <tr><td>BY</td><td>28</td></tr>
+        <tr><td>CH</td><td>21</td></tr>
+        <tr><td>CR</td><td>22</td></tr>
+        <tr><td>CY</td><td>28</td></tr>
+        <tr><td>CZ</td><td>24</td></tr>
+        <tr><td>DE</td><td>22</td></tr>
+        <tr><td>DK</td><td>18</td></tr>
+        <tr><td>DO</td><td>28</td></tr>
+        <tr><td>EE</td><td>20</td></tr>
+        <tr><td>EG</td><td>29</td></tr>
+        <tr><td>ES</td><td>24</td></tr>
+        <tr><td>FI</td><td>18</td></tr>
+        <tr><td>FO</td><td>18</td></tr>
+        <tr><td>FR</td><td>27</td></tr>
+        <tr><td>GB</td><td>22</td></tr>
+        <tr><td>GE</td><td>22</td></tr>
+        <tr><td>GI</td><td>23</td></tr>
+        <tr><td>GL</td><td>18</td></tr>
+        <tr><td>GR</td><td>27</td></tr>
+        <tr><td>GT</td><td>28</td></tr>
+        <tr><td>HR</td><td>21</td></tr>
+        <tr><td>HU</td><td>28</td></tr>
+        <tr><td>IE</td><td>22</td></tr>
+        <tr><td>IL</td><td>23</td></tr>
+        <tr><td>IQ</td><td>23</td></tr>
+        <tr><td>IS</td><td>26</td></tr>
+        <tr><td>IT</td><td>27</td></tr>
+        <tr><td>JO</td><td>30</td></tr>
+        <tr><td>KW</td><td>30</td></tr>
+        <tr><td>KZ</td><td>20</td></tr>
+        <tr><td>LB</td><td>28</td></tr>
+        <tr><td>LC</td><td>32</td></tr>
+        <tr><td>LI</td><td>21</td></tr>
+        <tr><td>LT</td><td>20</td></tr>
+        <tr><td>LU</td><td>20</td></tr>
+        <tr><td>LV</td><td>21</td></tr>
+        <tr><td>MC</td><td>27</td></tr>
+        <tr><td>MD</td><td>24</td></tr>
+        <tr><td>ME</td><td>22</td></tr>
+        <tr><td>MK</td><td>19</td></tr>
+        <tr><td>MR</td><td>27</td></tr>
+        <tr><td>MT</td><td>31</td></tr>
+        <tr><td>MU</td><td>30</td></tr>
+        <tr><td>NL</td><td>18</td></tr>
+        <tr><td>NO</td><td>15</td></tr>
+        <tr><td>PK</td><td>24</td></tr>
+        <tr><td>PL</td><td>28</td></tr>
+        <tr><td>PS</td><td>29</td></tr>
+        <tr><td>PT</td><td>25</td></tr>
+        <tr><td>QA</td><td>29</td></tr>
+        <tr><td>RO</td><td>24</td></tr>
+        <tr><td>RS</td><td>22</td></tr>
+        <tr><td>SA</td><td>24</td></tr>
+        <tr><td>SC</td><td>31</td></tr>
+        <tr><td>SE</td><td>24</td></tr>
+        <tr><td>SI</td><td>19</td></tr>
+        <tr><td>SK</td><td>24</td></tr>
+        <tr><td>SM</td><td>27</td></tr>
+        <tr><td>ST</td><td>25</td></tr>
+        <tr><td>SV</td><td>28</td></tr>
+        <tr><td>TL</td><td>23</td></tr>
+        <tr><td>TN</td><td>24</td></tr>
+        <tr><td>TR</td><td>26</td></tr>
+        <tr><td>UA</td><td>29</td></tr>
+        <tr><td>VA</td><td>22</td></tr>
+        <tr><td>VG</td><td>24</td></tr>
+        <tr><td>XK</td><td>20</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+
+  <section class="card">
+    <h2>Reference pages</h2>
+    <nav class="types"><a href="./index.html">demo</a><a href="./gtin.html">gtin</a><a href="./ean.html">ean</a><a href="./upc.html">upc</a><a href="./sscc.html">sscc</a><a href="./isbn.html">isbn</a><a href="./issn.html">issn</a><a href="./isin.html">isin</a><a href="./iban.html">iban</a><a href="./lei.html">lei</a><a href="./vin.html">vin</a><a href="./imei.html">imei</a><a href="./npi.html">npi</a><a href="./aba.html">aba</a><a href="./orcid.html">orcid</a><a href="./iso6346.html">iso6346</a><a href="./luhn.html">luhn</a><a href="./bic.html">bic</a><a href="./rf.html">rf</a><a href="./mrz.html">mrz</a><a href="./vat.html">vat</a><a href="./eori.html">eori</a><a href="./cusip.html">cusip</a><a href="./sedol.html">sedol</a><a href="./figi.html">figi</a><a href="./cas.html">cas</a><a href="./isni.html">isni</a></nav>
+    <nav class="types"><a href="./iban-lengths.html">IBAN country list</a><a href="./vat-number-formats.html">VAT number formats</a></nav>
+  </section>
+  <footer>
+    <p>Every check runs offline in the <a href="./index.html">browser demo</a>, or over the JSON API from the <a href="https://github.com/rhymeas/codecheck-api">open-source repository</a>.</p>
+    <p>Nothing you type leaves the page — all checks are local arithmetic.</p>
+  </footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EU and EFTA VAT number formats by country</title>
+<meta name="description" content="VAT number format for every EU and EFTA country, with the country prefix and national body pattern, so you can validate VAT numbers without a lookup call." />
+<link rel="canonical" href="https://rhymeas.github.io/codecheck-api/vat-number-formats.html" />
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--line:#262b36;--fg:#e7ebf0;--dim:#9aa4b2;--accent:#6ea8fe;--ok:#35c07a;--bad:#ef5f6b;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+h1{font-size:28px;margin:0 0 8px;letter-spacing:-.02em}
+h1 span{color:var(--accent)}
+h2{font-size:18px;margin:32px 0 10px}
+p.lead{color:var(--dim);margin:0 0 28px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin:0 0 24px}
+pre{background:#0b0d11;border:1px solid var(--line);border-radius:8px;padding:14px;overflow:auto;font:13px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+td:first-child{font-family:var(--mono)}
+a{color:var(--accent)}
+footer{color:var(--dim);font-size:13px;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+code{font-family:var(--mono)}
+nav.types{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0;padding:0;list-style:none}
+nav.types a{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px;text-decoration:none;color:var(--fg)}
+nav.types a:hover{border-color:var(--accent);color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+  <h1>VAT number <span>formats by country</span></h1>
+  <p class="lead">The national format of every EU and EFTA VAT number, so you can reject malformed input before you ever call a lookup service.</p>
+
+  <section class="card">
+    <h2>Format check first, lookup second</h2>
+    <p>Every VAT number starts with a two-letter country code followed by the national body. The body has a fixed shape per country, so a format check catches obvious typos and test data instantly, with no upstream call. Existence checks (VIES or a national registry) are a separate, slower step that only makes sense after the format is right.</p>
+    <p>CodeCheck validates the format of all 31 countries below. Try one in the <a href="./index.html?type=vat&amp;value=DE123456789">browser demo</a> or read the <a href="./vat.html">VAT reference page</a>.</p>
+<pre>curl "https://&lt;your-worker&gt;.workers.dev/v1/validate/vat/DE123456789"</pre>
+  </section>
+
+  <section class="card">
+    <h2>Formats</h2>
+    <table>
+      <thead>
+        <tr><th>Country</th><th>Body format</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>AT</td><td>AT, U and 8 digits</td></tr>
+        <tr><td>BE</td><td>BE, 10 digits starting with 0 or 1</td></tr>
+        <tr><td>BG</td><td>BG, 9 or 10 digits</td></tr>
+        <tr><td>CH</td><td>CH, E, 9 digits and an optional MWST, TVA or IVA</td></tr>
+        <tr><td>CY</td><td>CY, 8 digits and a letter</td></tr>
+        <tr><td>CZ</td><td>CZ, 8, 9 or 10 digits</td></tr>
+        <tr><td>DE</td><td>DE, 9 digits</td></tr>
+        <tr><td>DK</td><td>DK, 8 digits</td></tr>
+        <tr><td>EE</td><td>EE, 9 digits</td></tr>
+        <tr><td>EL</td><td>EL, 9 digits</td></tr>
+        <tr><td>ES</td><td>ES, 9 characters</td></tr>
+        <tr><td>FI</td><td>FI, 8 digits</td></tr>
+        <tr><td>FR</td><td>FR, 2 characters and 9 digits</td></tr>
+        <tr><td>GB</td><td>GB, 9 or 12 digits, or GD or HA and 3 digits</td></tr>
+        <tr><td>HR</td><td>HR, 11 digits</td></tr>
+        <tr><td>HU</td><td>HU, 8 digits</td></tr>
+        <tr><td>IE</td><td>IE, 8 or 9 characters</td></tr>
+        <tr><td>IT</td><td>IT, 11 digits</td></tr>
+        <tr><td>LT</td><td>LT, 9 or 12 digits</td></tr>
+        <tr><td>LU</td><td>LU, 8 digits</td></tr>
+        <tr><td>LV</td><td>LV, 11 digits</td></tr>
+        <tr><td>MT</td><td>MT, 8 digits</td></tr>
+        <tr><td>NL</td><td>NL, 9 digits, B and 2 digits</td></tr>
+        <tr><td>NO</td><td>NO, 9 digits and MVA</td></tr>
+        <tr><td>PL</td><td>PL, 10 digits</td></tr>
+        <tr><td>PT</td><td>PT, 9 digits</td></tr>
+        <tr><td>RO</td><td>RO, 2 to 10 digits</td></tr>
+        <tr><td>SE</td><td>SE, 12 digits</td></tr>
+        <tr><td>SI</td><td>SI, 8 digits</td></tr>
+        <tr><td>SK</td><td>SK, 10 digits</td></tr>
+        <tr><td>XI</td><td>XI, 9 or 12 digits, or GD or HA and 3 digits</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+
+  <section class="card">
+    <h2>Reference pages</h2>
+    <nav class="types"><a href="./index.html">demo</a><a href="./gtin.html">gtin</a><a href="./ean.html">ean</a><a href="./upc.html">upc</a><a href="./sscc.html">sscc</a><a href="./isbn.html">isbn</a><a href="./issn.html">issn</a><a href="./isin.html">isin</a><a href="./iban.html">iban</a><a href="./lei.html">lei</a><a href="./vin.html">vin</a><a href="./imei.html">imei</a><a href="./npi.html">npi</a><a href="./aba.html">aba</a><a href="./orcid.html">orcid</a><a href="./iso6346.html">iso6346</a><a href="./luhn.html">luhn</a><a href="./bic.html">bic</a><a href="./rf.html">rf</a><a href="./mrz.html">mrz</a><a href="./vat.html">vat</a><a href="./eori.html">eori</a><a href="./cusip.html">cusip</a><a href="./sedol.html">sedol</a><a href="./figi.html">figi</a><a href="./cas.html">cas</a><a href="./isni.html">isni</a></nav>
+    <nav class="types"><a href="./iban-lengths.html">IBAN country list</a><a href="./vat-number-formats.html">VAT number formats</a></nav>
+  </section>
+  <footer>
+    <p>Every check runs offline in the <a href="./index.html">browser demo</a>, or over the JSON API from the <a href="https://github.com/rhymeas/codecheck-api">open-source repository</a>.</p>
+    <p>Nothing you type leaves the page — all checks are local arithmetic.</p>
+  </footer>
+</main>
+</body>
+</html>

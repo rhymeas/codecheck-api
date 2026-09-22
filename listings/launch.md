@@ -4,6 +4,7 @@
 - Repository: <https://github.com/rhymeas/codecheck-api>
 - In-browser demo (runs the validators client-side): <https://rhymeas.github.io/codecheck-api/>
 - Per-type reference pages (algorithm, examples, API call, one per type): <https://rhymeas.github.io/codecheck-api/gtin.html>
+- Country reference pages: <https://rhymeas.github.io/codecheck-api/iban-lengths.html> and <https://rhymeas.github.io/codecheck-api/vat-number-formats.html>
 - API base URL: fill in after `npm run deploy` (SETUP.md part A)
 
 ## Show HN / dev.to title options
