@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ABA validation — checksum algorithm, examples and API</title>
+<meta name="description" content="Validate a ABA (US ABA routing transit number) and see why a value fails: format, length and check digit. ABA mod-10 (weights 3,7,1)." />
+<link rel="canonical" href="https://rhymeas.github.io/codecheck-api/aba.html" />
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--line:#262b36;--fg:#e7ebf0;--dim:#9aa4b2;--accent:#6ea8fe;--ok:#35c07a;--bad:#ef5f6b;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+h1{font-size:28px;margin:0 0 8px;letter-spacing:-.02em}
+h1 span{color:var(--accent)}
+h2{font-size:18px;margin:32px 0 10px}
+p.lead{color:var(--dim);margin:0 0 28px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin:0 0 24px}
+pre{background:#0b0d11;border:1px solid var(--line);border-radius:8px;padding:14px;overflow:auto;font:13px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+td:first-child{font-family:var(--mono)}
+a{color:var(--accent)}
+footer{color:var(--dim);font-size:13px;border-top:1px solid var(--line);padding-top:18px;margin-top:36px}
+code{font-family:var(--mono)}
+nav.types{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0;padding:0;list-style:none}
+nav.types a{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px;text-decoration:none;color:var(--fg)}
+nav.types a:hover{border-color:var(--accent);color:var(--accent)}
+</style>
+</head>
+<body>
+<main>
+  <h1>ABA <span>validation</span></h1>
+  <p class="lead">US ABA routing transit number — checksum: ABA mod-10 (weights 3,7,1). Free in your browser, or over the JSON API.</p>
+
+  <section class="card">
+    <h2>What it is</h2>
+    <p>US ABA routing transit number. CodeCheck verifies three things separately — format, length and check digit — and returns the expected and provided check digit, so a failed value tells you exactly what is wrong instead of just saying no.</p>
+
+    <h2>Algorithm</h2>
+    <p>ABA mod-10 (weights 3,7,1). The answer is derived from the value itself, with no database lookup and no third-party call, so it is deterministic, fast and privacy-safe.</p>
+
+    <h2>Examples</h2>
+    <table>
+      <thead>
+        <tr><th>Value</th><th>Result</th><th>Expected</th><th>Provided</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>021000021</td><td>valid</td><td>—</td><td>1</td></tr>
+      </tbody>
+    </table>
+
+    <h2>API</h2>
+<pre>curl "https://&lt;your-worker&gt;.workers.dev/v1/validate/aba/021000021"</pre>
+<p>This type has a single trailing check digit, so CodeCheck can also compute it:</p>
+<pre>GET /v1/complete/aba/{body}</pre>
+<p><a href="./index.html?type=aba&amp;value=021000021">Try it in the browser demo</a> — the demo runs the same code offline.</p>
+  </section>
+
+  <section class="card">
+    <h2>Other identifier types</h2>
+    <nav class="types"><a href="./index.html">demo</a><a href="./gtin.html">gtin</a><a href="./ean.html">ean</a><a href="./upc.html">upc</a><a href="./sscc.html">sscc</a><a href="./isbn.html">isbn</a><a href="./issn.html">issn</a><a href="./isin.html">isin</a><a href="./iban.html">iban</a><a href="./lei.html">lei</a><a href="./vin.html">vin</a><a href="./imei.html">imei</a><a href="./npi.html">npi</a><a href="./orcid.html">orcid</a><a href="./iso6346.html">iso6346</a><a href="./luhn.html">luhn</a><a href="./bic.html">bic</a><a href="./rf.html">rf</a><a href="./mrz.html">mrz</a><a href="./vat.html">vat</a><a href="./eori.html">eori</a><a href="./cusip.html">cusip</a><a href="./sedol.html">sedol</a><a href="./figi.html">figi</a><a href="./cas.html">cas</a><a href="./isni.html">isni</a></nav>
+  </section>
+
+  <footer>
+    <p>Same code offline: this reference and the <a href="./index.html">browser demo</a> both run the validators from the <a href="https://github.com/rhymeas/codecheck-api">open-source repository</a>.</p>
+    <p>Nothing you type leaves the page — all checks are local arithmetic.</p>
+  </footer>
+</main>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I validate a ABA?","acceptedAnswer":{"@type":"Answer","text":"Check the format and length, then recompute the check digit with ABA mod-10 (weights 3,7,1) and compare it with the last character. CodeCheck does this locally in milliseconds via GET /v1/validate/aba/{value}."}},{"@type":"Question","name":"What does an invalid ABA mean?","acceptedAnswer":{"@type":"Answer","text":"CodeCheck separates the result into format, length and checkDigit, and returns the expected and provided check digit, so an invalid ABA tells you whether the shape is wrong, the length is wrong, or only the check digit is wrong."}}]}
+</script>
+</body>
+</html>

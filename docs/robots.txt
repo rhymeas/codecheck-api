@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://rhymeas.github.io/codecheck-api/sitemap.xml

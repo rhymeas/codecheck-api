@@ -74,12 +74,17 @@ valueInput.addEventListener("keydown", (event) => {
 for (const t of types) {
   const example = VALIDATORS[t].examples[0];
   const tr = document.createElement("tr");
-  const cells = [t, VALIDATORS[t].description, example, completable.has(t) ? "yes" : "no"];
-  cells.forEach((text) => {
+  const nameCell = document.createElement("td");
+  const nameLink = document.createElement("a");
+  nameLink.href = `./${t}.html`;
+  nameLink.textContent = t;
+  nameCell.appendChild(nameLink);
+  tr.appendChild(nameCell);
+  for (const text of [VALIDATORS[t].description, example, completable.has(t) ? "yes" : "no"]) {
     const td = document.createElement("td");
     td.textContent = String(text);
     tr.appendChild(td);
-  });
+  }
   const action = document.createElement("td");
   const link = document.createElement("a");
   link.href = "#try";
@@ -91,4 +96,12 @@ for (const t of types) {
 }
 
 typeSelect.addEventListener("change", syncComplete);
-setType(types[0], VALIDATORS[types[0]].examples[0]);
+
+const params = new URLSearchParams(location.search);
+const initialType = params.get("type");
+const initialValue = params.get("value");
+if (initialType && types.includes(initialType)) {
+  setType(initialType, initialValue ?? VALIDATORS[initialType].examples[0]);
+} else {
+  setType(types[0], VALIDATORS[types[0]].examples[0]);
+}

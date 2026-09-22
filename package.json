@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "smoke": "node scripts/smoke.mjs",
-    "build:site": "esbuild site/app.ts --bundle --format=iife --minify --target=es2020 --outfile=docs/app.js"
+    "gen:pages": "node --experimental-strip-types site/gen-pages.ts",
+    "build:site": "npm run gen:pages && esbuild site/app.ts --bundle --format=iife --minify --target=es2020 --outfile=docs/app.js"
   },
   "dependencies": {
     "hono": "^4.13.8"

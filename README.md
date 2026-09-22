@@ -5,6 +5,10 @@ Deterministic identifier and checksum validation as a Cloudflare Worker.
 **Live demo (runs these same validators in your browser):**
 https://rhymeas.github.io/codecheck-api/
 
+**Per-type reference pages** (algorithm, examples, API call — one page per
+type, written for search engines and humans):
+https://rhymeas.github.io/codecheck-api/gtin.html
+
 Pure math, zero data lookups, zero storage, no external dependencies at
 runtime. Every response is computed from the input alone, so the service is
 cacheable, privacy-safe and cheap to run.
