@@ -50,9 +50,9 @@ Honest caveats, stated to the user and recorded here:
 
 ## What was built
 Cloudflare Worker (TypeScript + Hono), zero runtime dependencies beyond the
-router. 21 identifier types, single + batch validate endpoints, a check-digit
-completion endpoint (`/v1/complete`, 16 of the 21 types) so the same service can
-generate valid test data, and a public HTML landing page at `/`. 141 unit tests
+router. 26 identifier types, single + batch validate endpoints, a check-digit
+completion endpoint (`/v1/complete`, 21 of the 26 types) so the same service can
+generate valid test data, and a public HTML landing page at `/`. 170 unit tests
 covering real-world vectors (LEI values pulled from the GLEIF API, canonical
 IBANs for DE/GB/FR, UPC/EAN/GTIN-8/14, ISBN-10 with X check, ISSN X check,
 ORCID X check, ISO 6346 container, and a round-trip assertion that every

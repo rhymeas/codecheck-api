@@ -711,6 +711,148 @@ export function validateEori(raw: string): ValidationResult {
   });
 }
 
+const CUSIP_VALUES: Record<string, number> = { "*": 36, "@": 37, "#": 38 };
+const SEDOL_WEIGHTS = [1, 3, 1, 7, 3, 9, 1];
+const FIGI_VOWELS = /[AEIOU]/;
+
+const normalizeCusip = (raw: string): string =>
+  raw.trim().toUpperCase().replace(/[^0-9A-Z*@#]/g, "");
+
+function alnumValue(ch: string): number {
+  const code = ch.charCodeAt(0);
+  if (code >= 48 && code <= 57) return code - 48;
+  if (CUSIP_VALUES[ch] !== undefined) return CUSIP_VALUES[ch];
+  return code - 55;
+}
+
+function digitSum(value: number): number {
+  let sum = 0;
+  for (const ch of String(value)) sum += ch.charCodeAt(0) - 48;
+  return sum;
+}
+
+function weightedDigitSumCheckDigit(body: string, weights: number[]): string {
+  let sum = 0;
+  for (let i = 0; i < body.length; i++) sum += digitSum(alnumValue(body[i]) * weights[i]);
+  return String((10 - (sum % 10)) % 10);
+}
+
+export function validateCusip(raw: string): ValidationResult {
+  const n = normalizeCusip(raw);
+  const algorithm = "CUSIP mod-10 with digit summing";
+  if (!/^[0-9A-Z*@#]{8}[0-9]$/.test(n)) {
+    return make("cusip", raw, n, algorithm, false, {
+      checks: { format: false, length: false, checkDigit: null },
+      reason: "cusip must be 8 alphanumeric characters plus a numeric check digit",
+    });
+  }
+  const expected = weightedDigitSumCheckDigit(n.slice(0, 8), [1, 2, 1, 2, 1, 2, 1, 2]);
+  const provided = n[8];
+  const checkDigit = provided === expected;
+  return make("cusip", raw, n, algorithm, checkDigit, {
+    checks: { format: true, length: true, checkDigit },
+    expectedCheckDigit: expected,
+    providedCheckDigit: provided,
+    reason: checkDigit ? null : "check digit mismatch",
+  });
+}
+
+export function validateSedol(raw: string): ValidationResult {
+  const n = normalize(raw);
+  const algorithm = "SEDOL mod-10 (weights 1,3,1,7,3,9,1)";
+  if (!/^[0-9A-Z]{6}[0-9]$/.test(n)) {
+    return make("sedol", raw, n, algorithm, false, {
+      checks: { format: false, length: false, checkDigit: null },
+      reason: "sedol must be 6 alphanumeric characters plus a numeric check digit",
+    });
+  }
+  let body = 0;
+  for (let i = 0; i < 6; i++) body += alnumValue(n[i]) * SEDOL_WEIGHTS[i];
+  const expected = String((10 - (body % 10)) % 10);
+  const provided = n[6];
+  const checkDigit = provided === expected;
+  return make("sedol", raw, n, algorithm, checkDigit, {
+    checks: { format: true, length: true, checkDigit },
+    expectedCheckDigit: expected,
+    providedCheckDigit: provided,
+    reason: checkDigit ? null : "check digit mismatch",
+  });
+}
+
+export function validateFigi(raw: string): ValidationResult {
+  const n = normalize(raw);
+  const algorithm = "FIGI mod-10 with digit summing";
+  const shaped =
+    /^[A-Z0-9]{12}$/.test(n) &&
+    n[2] === "G" &&
+    !FIGI_VOWELS.test(n.slice(0, 11)) &&
+    DIGITS.test(n[11]);
+  if (!shaped) {
+    return make("figi", raw, n, algorithm, false, {
+      checks: { format: false, length: n.length === 12, checkDigit: null },
+      reason:
+        "figi must be 12 characters: a consonant prefix, G, 8 consonants or digits, then a numeric check digit",
+    });
+  }
+  const expected = weightedDigitSumCheckDigit(
+    n.slice(0, 11),
+    [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+  );
+  const provided = n[11];
+  const checkDigit = provided === expected;
+  return make("figi", raw, n, algorithm, checkDigit, {
+    checks: { format: true, length: true, checkDigit },
+    expectedCheckDigit: expected,
+    providedCheckDigit: provided,
+    reason: checkDigit ? null : "check digit mismatch",
+  });
+}
+
+export function validateCas(raw: string): ValidationResult {
+  const n = normalize(raw);
+  const algorithm = "CAS Registry mod-10 positional weights";
+  if (!/^[1-9][0-9]{3,9}$/.test(n)) {
+    return make("cas", raw, n, algorithm, false, {
+      checks: { format: false, length: false, checkDigit: null },
+      reason: "cas must be 5 to 10 digits starting with a non-zero digit (hyphens optional)",
+    });
+  }
+  const body = n.slice(0, -1);
+  const reversed = body.split("").reverse();
+  let sum = 0;
+  for (let i = 0; i < reversed.length; i++) sum += (reversed[i].charCodeAt(0) - 48) * (i + 1);
+  const expected = String(sum % 10);
+  const provided = n[n.length - 1];
+  const checkDigit = provided === expected;
+  return make("cas", raw, n, algorithm, checkDigit, {
+    checks: { format: true, length: true, checkDigit },
+    expectedCheckDigit: expected,
+    providedCheckDigit: provided,
+    reason: checkDigit ? null : "check digit mismatch",
+  });
+}
+
+export function validateIsni(raw: string): ValidationResult {
+  const n = normalize(raw);
+  const algorithm = "ISO 7064 MOD 11-2";
+  if (!/^[0-9]{15}[0-9X]$/.test(n)) {
+    return make("isni", raw, n, algorithm, false, {
+      checks: { format: false, length: false, checkDigit: null },
+      reason: "isni must be 16 characters (15 digits plus digit or X)",
+    });
+  }
+  const r = mod11_2(n.slice(0, 15));
+  const expected = r === 10 ? "X" : String(r);
+  const provided = n[15];
+  const checkDigit = provided === expected;
+  return make("isni", raw, n, algorithm, checkDigit, {
+    checks: { format: true, length: true, checkDigit },
+    expectedCheckDigit: expected,
+    providedCheckDigit: provided,
+    reason: checkDigit ? null : "check digit mismatch",
+  });
+}
+
 export type ValidatorEntry = {
   type: string;
   description: string;
@@ -845,6 +987,36 @@ export const VALIDATORS: Record<string, ValidatorEntry> = {
     examples: ["DE123456789012345", "FR1234567890"],
     validate: validateEori,
   },
+  cusip: {
+    type: "cusip",
+    description: "CUSIP-9 North American security identifier",
+    examples: ["037833100", "594918104"],
+    validate: validateCusip,
+  },
+  sedol: {
+    type: "sedol",
+    description: "SEDOL-7 UK and Ireland security identifier",
+    examples: ["B0YBKJ7", "0263494"],
+    validate: validateSedol,
+  },
+  figi: {
+    type: "figi",
+    description: "FIGI-12 financial instrument global identifier",
+    examples: ["BBG000BLNNV0", "BBG000BLNQ16"],
+    validate: validateFigi,
+  },
+  cas: {
+    type: "cas",
+    description: "CAS Registry number (chemical substances)",
+    examples: ["7732-18-5", "50-00-0"],
+    validate: validateCas,
+  },
+  isni: {
+    type: "isni",
+    description: "ISNI-16 international standard name identifier",
+    examples: ["0000000121032683"],
+    validate: validateIsni,
+  },
 };
 
 export function validate(type: string, value: string): ValidationResult {
@@ -883,6 +1055,11 @@ const COMPLETION_ALGORITHMS: Record<string, string> = {
   iban: "ISO 13616 mod-97-10",
   luhn: "Luhn mod-10",
   rf: "ISO 11649 mod-97-10",
+  cusip: "CUSIP mod-10 with digit summing",
+  sedol: "SEDOL mod-10 (weights 1,3,1,7,3,9,1)",
+  figi: "FIGI mod-10 with digit summing",
+  cas: "CAS Registry mod-10 positional weights",
+  isni: "ISO 7064 MOD 11-2",
 };
 
 export function completableTypes(): string[] {
@@ -892,7 +1069,7 @@ export function completableTypes(): string[] {
 export function completeCheckDigit(type: string, rawBody: string): CompletionResult {
   const algorithm = COMPLETION_ALGORITHMS[type];
   if (!algorithm) throw new Error(`unsupported type '${type}'`);
-  const n = normalize(rawBody);
+  const n = type === "cusip" ? normalizeCusip(rawBody) : normalize(rawBody);
   let checkDigit: string;
   switch (type) {
     case "gtin":
@@ -1000,6 +1177,49 @@ export function completeCheckDigit(type: string, rawBody: string): CompletionRes
       if (!/^[0-9A-Z]{1,21}$/.test(n))
         throw new Error("rf body must be up to 21 alphanumeric characters");
       checkDigit = String(98 - mod97(expandAlpha(n + "RF00"))).padStart(2, "0");
+      break;
+    }
+    case "cusip": {
+      if (!/^[0-9A-Z*@#]{8}$/.test(n))
+        throw new Error("cusip body must be 8 alphanumeric characters");
+      checkDigit = weightedDigitSumCheckDigit(n, [1, 2, 1, 2, 1, 2, 1, 2]);
+      break;
+    }
+    case "sedol": {
+      if (!/^[0-9A-Z]{6}$/.test(n)) throw new Error("sedol body must be 6 alphanumeric characters");
+      let sum = 0;
+      for (let i = 0; i < 6; i++) sum += alnumValue(n[i]) * SEDOL_WEIGHTS[i];
+      checkDigit = String((10 - (sum % 10)) % 10);
+      break;
+    }
+    case "figi": {
+      if (
+        !/^[A-Z0-9]{11}$/.test(n) ||
+        n[2] !== "G" ||
+        FIGI_VOWELS.test(n)
+      )
+        throw new Error(
+          "figi body must be 11 characters: a consonant prefix, G and 8 consonants or digits",
+        );
+      checkDigit = weightedDigitSumCheckDigit(
+        n,
+        [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+      );
+      break;
+    }
+    case "cas": {
+      if (!/^[1-9][0-9]{3,9}$/.test(n))
+        throw new Error("cas body must be 4 to 9 digits starting with a non-zero digit");
+      const reversed = n.split("").reverse();
+      let sum = 0;
+      for (let i = 0; i < reversed.length; i++) sum += (reversed[i].charCodeAt(0) - 48) * (i + 1);
+      checkDigit = String(sum % 10);
+      break;
+    }
+    case "isni": {
+      if (n.length !== 15 || !DIGITS.test(n)) throw new Error("isni body must be 15 digits");
+      const r = mod11_2(n);
+      checkDigit = r === 10 ? "X" : String(r);
       break;
     }
     default:

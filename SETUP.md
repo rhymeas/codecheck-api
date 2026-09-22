@@ -1,6 +1,6 @@
 # Going live
 
-The software is finished: 141 passing tests, a verified Worker build, an
+The software is finished: 170 passing tests, a verified Worker build, an
 OpenAPI spec, and a paste-ready marketplace listing. What remains cannot be
 done by an agent, because it needs your identity, your accounts and your payout
 details. This file is the exact runbook, in order.

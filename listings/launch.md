@@ -8,7 +8,7 @@
 ## Show HN / dev.to title options
 - Show HN: I built a checksum-validation API that answers in 5 ms because it never calls anyone
 - Your identifier validator is slow because it does a database lookup. It doesn't need to.
-- 21 identifier checks, zero data lookups: why deterministic validation is the cheapest API you can run
+- 26 identifier checks, zero data lookups: why deterministic validation is the cheapest API you can run
 
 ## dev.to post draft
 

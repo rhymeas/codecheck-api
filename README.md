@@ -43,6 +43,11 @@ GET  /                            (JSON info, or an HTML page in a browser)
 | mrz | Machine readable zone line | ICAO 9303 TD3 check digits |
 | vat | EU/EFTA VAT number | per-country format (prefix + national number) |
 | eori | EORI customs number | country code + 1..15 alphanumeric |
+| cusip | CUSIP-9 North American securities | mod-10 with digit summing |
+| sedol | SEDOL-7 UK/Ireland securities | mod-10 (1,3,1,7,3,9,1) |
+| figi | FIGI-12 financial instrument ID | mod-10 with digit summing |
+| cas | CAS Registry number | mod-10 positional weights |
+| isni | ISNI-16 name identifier | ISO 7064 MOD 11-2 |
 
 ## Example
 
@@ -148,7 +153,7 @@ launch, including the steps that need your own identity.
 
 ## Runtime properties
 
-- Bundle: ~97 KiB raw, ~24 KiB gzip, no runtime dependencies beyond Hono.
+- Bundle: ~114 KiB raw, ~27 KiB gzip, no runtime dependencies beyond Hono.
 - Latency: single-digit milliseconds, pure CPU, no I/O.
 - State: none. No database, no KV, no logging of inputs.
 - Data protection: no personal data is stored or looked up; input is only

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Deterministic identifier validation API (GTIN, ISBN, IBAN, VIN, LEI, ISIN, IMEI, NPI, ABA, ORCID, ISO 6346, BIC, RF, MRZ, VAT, EORI)",
+  "description": "Deterministic identifier validation API (GTIN, ISBN, IBAN, VIN, LEI, ISIN, IMEI, NPI, ABA, ORCID, ISO 6346, BIC, RF, MRZ, VAT, EORI, CUSIP, SEDOL, FIGI, CAS, ISNI)",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",

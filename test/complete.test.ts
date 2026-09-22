@@ -20,6 +20,11 @@ const vectors: Array<{ type: string; body: string; expected: string }> = [
   { type: "iban", body: "DE370400440532013000", expected: "DE89370400440532013000" },
   { type: "luhn", body: "7992739871", expected: "79927398713" },
   { type: "rf", body: "539007547034", expected: "RF18539007547034" },
+  { type: "cusip", body: "03783310", expected: "037833100" },
+  { type: "sedol", body: "B0YBKJ", expected: "B0YBKJ7" },
+  { type: "figi", body: "BBG000BLNNV", expected: "BBG000BLNNV0" },
+  { type: "cas", body: "7732-18", expected: "7732185" },
+  { type: "isni", body: "000000012103268", expected: "0000000121032683" },
 ];
 
 describe("check digit completion", () => {

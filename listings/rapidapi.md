@@ -10,7 +10,7 @@ Validate GTIN/EAN/UPC, ISBN, ISSN, ISIN, IBAN, LEI, VIN, IMEI, NPI, ABA, ORCID a
 Data
 
 ## Tags
-validation, gtin, ean, upc, barcode, iban, isbn, isin, lei, vin, imei, checksum, luhn, eori, vat, customs, compliance, swift, bic, sepa, mrz
+validation, gtin, ean, upc, barcode, iban, isbn, isin, lei, vin, imei, checksum, luhn, eori, vat, customs, compliance, swift, bic, sepa, mrz, cusip, sedol, figi, cas, isni
 
 ## Long description (markdown)
 
@@ -25,7 +25,7 @@ consistent, fast and privacy-safe.
 
 - **Milliseconds, not seconds.** Pure CPU arithmetic. No upstream call, so no timeouts and no downtime.
 - **Honest results.** Every response separates `format`, `length` and `checkDigit`, plus `expectedCheckDigit` and `providedCheckDigit`. You see *why* something failed, not just that it did.
-- **One call, many types.** 21 identifier types behind a single contract.
+- **One call, many types.** 26 identifier types behind a single contract.
 - **Batch up to 100 items per request.** Clean imported CSV/XLSX in one round trip.
 - **Generate check digits too.** `GET /v1/complete/{type}/{body}` returns the correct check digit and the finished identifier — useful for test data and repairing broken imports.
 - **Zero PII risk.** Values are never logged or stored; nothing is looked up in a database.
@@ -55,13 +55,18 @@ consistent, fast and privacy-safe.
 | mrz | Passport / ID machine readable zone (ICAO 9303) |
 | vat | EU/EFTA VAT number format (country prefix + national number) |
 | eori | EORI customs number format |
+| cusip | CUSIP-9 North American securities |
+| sedol | SEDOL-7 UK/Ireland securities |
+| figi | FIGI-12 financial instrument identifier |
+| cas | CAS Registry number (chemicals) |
+| isni | ISNI-16 name identifier |
 
 **Typical uses**
 
 - Data-cleaning pipelines: reject bad barcodes, VAT-side IBANs, ISBNs before they reach the database.
 - E-commerce / ERP imports: validate GTINs and SSCCs from supplier files.
 - EU B2B onboarding: check VAT numbers, IBANs, BICs, EORIs and LEIs in one contract.
-- KYC / finance onboarding: check IBAN, LEI and BIC-side identifiers.
+- KYC / finance onboarding: check IBAN, LEI, BIC, CUSIP, SEDOL and FIGI identifiers.
 - Fleet, logistics and healthcare systems: VIN, container codes, IMEI, NPI.
 - Test-data generation: read `expectedCheckDigit` to build valid samples.
 
