@@ -1,0 +1,9 @@
+name = "codecheck-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+[observability]
+enabled = true
+
+[vars]
+DEV_MODE = "0"

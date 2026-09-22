@@ -1,0 +1,26 @@
+{
+  "name": "codecheck-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic identifier validation API (GTIN, ISBN, IBAN, VIN, LEI, ISIN, IMEI, NPI, ABA, ORCID, ISO 6346, BIC, RF, MRZ, VAT, EORI)",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke.mjs",
+    "build:site": "esbuild site/app.ts --bundle --format=iife --minify --target=es2020 --outfile=docs/app.js"
+  },
+  "dependencies": {
+    "hono": "^4.13.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260922.1",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1",
+    "wrangler": "^4.136.1"
+  }
+}

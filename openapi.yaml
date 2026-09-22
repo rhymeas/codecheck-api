@@ -1,0 +1,218 @@
+openapi: 3.0.3
+info:
+  title: CodeCheck API
+  version: 0.1.0
+  description: >-
+    Deterministic validation of business and product identifiers: GTIN/EAN/UPC,
+    SSCC, ISBN, ISSN, ISIN, IBAN, LEI, VIN, IMEI, NPI, ABA routing numbers,
+    ORCID iDs, ISO 6346 container codes and generic Luhn checksums. Pure
+    checksum math, no data lookups, no storage, sub-10 ms responses.
+servers:
+  - url: https://codecheck-api.example.workers.dev
+security:
+  - apiKey: []
+paths:
+  /v1/health:
+    get:
+      summary: Liveness probe
+      security: []
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  time:
+                    type: string
+  /v1/types:
+    get:
+      summary: List supported identifier types
+      security: []
+      responses:
+        "200":
+          description: Catalogue of supported types with examples
+  /v1/validate/{type}/{value}:
+    get:
+      summary: Validate a single identifier
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - gtin
+              - ean
+              - upc
+              - sscc
+              - isbn
+              - issn
+              - isin
+              - iban
+              - lei
+              - vin
+              - imei
+              - npi
+              - aba
+              - orcid
+              - iso6346
+              - luhn
+              - bic
+              - rf
+              - mrz
+              - vat
+              - eori
+        - name: value
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 4006381333931
+      responses:
+        "200":
+          description: Validation result (valid=false means the checksum failed)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationResult"
+        "400":
+          description: Unsupported type
+        "401":
+          description: Missing or wrong API key
+        "413":
+          description: Value longer than 128 characters
+  /v1/complete/{type}/{body}:
+    get:
+      summary: Compute the check digit for an identifier body
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - gtin
+              - ean
+              - upc
+              - sscc
+              - isbn
+              - issn
+              - isin
+              - imei
+              - npi
+              - aba
+              - orcid
+              - iso6346
+              - lei
+              - iban
+              - luhn
+              - rf
+        - name: body
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "400638133393"
+      responses:
+        "200":
+          description: The check digit and the completed identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompletionResult"
+        "400":
+          description: Type does not support check-digit completion
+        "401":
+          description: Missing or wrong API key
+        "422":
+          description: Body has the wrong length or characters for this type
+  /v1/validate:
+    post:
+      summary: Validate up to 100 identifiers in one call
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: object
+                    required: [type, value]
+                    properties:
+                      type:
+                        type: string
+                      value:
+                        type: string
+      responses:
+        "200":
+          description: Batch results
+        "413":
+          description: More than 100 items
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+  schemas:
+    ValidationResult:
+      type: object
+      properties:
+        type:
+          type: string
+        input:
+          type: string
+        normalized:
+          type: string
+        valid:
+          type: boolean
+        algorithm:
+          type: string
+        checks:
+          type: object
+          properties:
+            format:
+              type: boolean
+            length:
+              type: boolean
+            checkDigit:
+              type: boolean
+              nullable: true
+        expectedCheckDigit:
+          type: string
+          nullable: true
+        providedCheckDigit:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        reason:
+          type: string
+          nullable: true
+    CompletionResult:
+      type: object
+      properties:
+        type:
+          type: string
+        body:
+          type: string
+        normalized:
+          type: string
+        checkDigit:
+          type: string
+        complete:
+          type: string
+          description: Body with the correct check digit appended (inserted after the country code for IBANs)
+        algorithm:
+          type: string

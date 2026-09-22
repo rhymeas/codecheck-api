@@ -1,0 +1,146 @@
+# Going live
+
+The software is finished: 141 passing tests, a verified Worker build, an
+OpenAPI spec, and a paste-ready marketplace listing. What remains cannot be
+done by an agent, because it needs your identity, your accounts and your payout
+details. This file is the exact runbook, in order.
+
+Total time: roughly 30–45 minutes. Cost: €0.
+
+---
+
+## What is already done
+
+- Worker source, tests and build config in this repository.
+- `openapi.yaml` for the marketplace to import.
+- `listings/rapidapi.md` — description, tags, use cases, pricing tiers.
+- `listings/launch.md` — article drafts and a distribution checklist.
+- `scripts/smoke.mjs` — post-deploy verification you can run in one line.
+- CI that typechecks and runs the tests on every push.
+
+---
+
+## Part A — deploy the Worker (about 10 minutes)
+
+1. Create a free Cloudflare account at <https://dash.cloudflare.com/sign-up>.
+   No credit card is required for Workers.
+
+2. In this directory, log the CLI in. A browser window opens and asks you to
+   authorize the login:
+
+   ```bash
+   npm install
+   npx wrangler login
+   ```
+
+3. Deploy:
+
+   ```bash
+   npm run deploy
+   ```
+
+   Wrangler prints the public URL, for example
+   `https://codecheck-api.<your-subdomain>.workers.dev`. Write it down.
+
+4. Set the two secrets. `API_KEY` is any long random string you choose (a
+   password manager can generate one). You will set `RAPIDAPI_SECRET` in Part B
+   once the marketplace gives it to you:
+
+   ```bash
+   npx wrangler secret put API_KEY
+   ```
+
+   Secrets take effect immediately; no redeploy is needed.
+
+5. Verify the live service:
+
+   ```bash
+   node scripts/smoke.mjs https://codecheck-api.<your-subdomain>.workers.dev <your-api-key>
+   ```
+
+   Expected last line: `all checks passed against ...`. If a check fails, the
+   printed status and body show which one and why.
+
+6. Optional uptime monitoring: create a free account at
+   <https://uptimerobot.com> and add an HTTP monitor for
+   `https://<your-worker>/v1/health` with keyword `ok`.
+
+### Deploying from GitHub instead (optional)
+
+Push this repository to GitHub, then add two repository secrets:
+`CLOUDFLARE_API_TOKEN` (Cloudflare dashboard → My Profile → API Tokens → the
+"Edit Cloudflare Workers" template) and `CLOUDFLARE_ACCOUNT_ID` (dashboard →
+Workers & Pages → Account details). The `deploy` workflow can then be run from
+the Actions tab; it typechecks, tests and deploys in one go.
+
+---
+
+## Part B — list it on the marketplace (about 20 minutes)
+
+1. Sign up at <https://rapidapi.com>. Switch to provider mode ("Add New API" /
+   "My APIs").
+
+2. Create the API with the values from `listings/rapidapi.md`:
+   - Name: `CodeCheck API — Identifier & Checksum Validation`
+   - Category: `Data`
+   - Description: copy the long description block.
+   - Base URL: your Worker URL from Part A.
+
+3. Import the endpoints: use `openapi.yaml` if the UI offers an import, or add
+   the five routes manually. The `x-api-key` security scheme maps to the
+   header RapidAPI will send.
+
+4. Copy the marketplace "proxy secret" from the API's security settings and
+   register it on your Worker:
+
+   ```bash
+   npx wrangler secret put RAPIDAPI_SECRET
+   ```
+
+   Make sure the marketplace sends it as the header name
+   `x-rapidapi-proxy-secret`. That is the value the Worker checks.
+
+5. Create the pricing plans from `listings/rapidapi.md`:
+   - Basic — $0, 500 requests/month (the hook that gets developers in)
+   - Pro — $4.99, 25,000 requests/month
+   - Ultra — $9.99, 150,000 requests/month
+   - Mega — $29.99, 1,000,000 requests/month
+
+6. Use the marketplace's test console to call
+   `/v1/validate/gtin/4006381333931`. You should get `"valid": true`.
+
+7. Publish the listing. Some marketplaces review new APIs before they appear;
+   if it stays hidden, check the review queue for a message.
+
+---
+
+## Part C — get the first users (this is the part that takes months)
+
+The API is the asset; traffic is the work. From `listings/launch.md`:
+
+1. Publish the dev.to article (draft is written; it argues that identifier
+   validation is pure arithmetic and therefore should not be a database
+   lookup).
+2. Post a short version on Hacker News (Show HN) and in one or two relevant
+   subreddits, on different days.
+3. Put the marketplace link in your GitHub repository README and profile.
+4. Re-check after 30 days: how many calls, how many paying subscribers.
+5. Kill rule agreed in `notes/RESEARCH.md`: under $10/month after three
+   months means swap the niche, keep the harness, try the next idea.
+
+---
+
+## Honest limits
+
+- **No income until a payment clears.** Revenue depends on traffic, which
+  depends on the posts above and on the marketplace's own search placement.
+  A realistic first result is $20–50/month somewhere between month 3 and
+  month 6, and it may stay at zero.
+- **Accounts, KYC and payouts need you.** Sign-ups, identity checks and the
+  bank/PayPal details are yours to provide; that is why this file exists.
+- **Taxes.** The marketplace is the merchant of record for buyers, so it
+  collects from customers and pays you. The money you receive is still income
+  and you must declare it in your country.
+- **Deploying is a public, hard-to-undo action.** Once the Worker is reachable
+  and the listing is public, treat the URL as permanent. Rotate `API_KEY` if
+  it ever leaks.
